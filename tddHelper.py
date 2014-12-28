@@ -2,65 +2,58 @@ import unittest
       
 #This is the beginning of a TDD helper program for compiled languages    
 class TddHelperJava:
-##    def handleTwoMethodQualifiers(splitMethodQualifiers):
+##    def handleMethodQualifiers(splitMethodQualifiers):
 ##
 ##        return;
 
-##    def handleThreeMethodQualifiers(splitMethodQualifiers):
-##
-##        return;
-##
-##    def handleFourMethodQualifiers(splitMethodQualifiers):
-##
-##        return;
-
-    def handleMethodQualifiers(splitMethodQualifiers):
-
-        return;
-
-    def parseMethodQualifiers(methodQualifiers):
+    def createUTForReturnType(methodQualifiers):
+        minMethodLength = 2; #The minimum amount of strings in a header string
+        primitiveIntDataTypes = ["int", "short", "byte", "long", "float", "double"];
+        commonReturnType = ["String"];
+        
         if (methodQualifiers is None) or not(isinstance(methodQualifiers, str)):
             raise(TypeError, "Invalid method qualifiers passed");
         
         splitMethodQualifiers = str.split(methodQualifiers);
-        print("Split method qualifiers", splitMethodQualifiers);
+##        print("Split method qualifiers", splitMethodQualifiers);
 
         #Try making a state machine to handle the parsing
         methodQualifierLength = len(splitMethodQualifiers);
 
         result = None;
-        if methodQualifierLength >= 2:
-            #Then we know we only have a return value and a methodName
-##            result = handleTwoMethodQualifiers(splitMethodQualifiers);
-            result = handleMethodQualifiers(splitMethodQualifiers);
-##            break;
-##        elif methodQualifierLength == 3:
-##            #Then we know we only have a access/instance qualifier,
-##            #a return value, and a methodName
-##            result = handleThreeMethodQualifiers(splitMethodQualifiers);
-####            break;
-##        elif methodQualifierLength == 4:
-##            #Then we know we have an access qualifier, an instance qualifier,
-##            #a return value, and a methodName
-##            result = handleFourMethodQualifiers(splitMethodQualifiers);
-##            break;
+        if methodQualifierLength >= minMethodLength:
+            #Then we know we at least have a 'return type' and a 'method name'
+##            result = handleMethodQualifiers(splitMethodQualifiers);
+##            unitTestResult = "void test_"
+            result = None;
         else: #Invalid Method Signature
-            raise ValueError; 
-##            result = None;
-##            break;
-        
-        for qualifier in splitMethodQualifiers:
-            print(i);
+            raise ValueError;
             
-        return None;
+        return result;
 
-    def parseMethodParameters(methodParams):
+    def createUTForMethodParams(methodParams):
 
         return None;
     
     def splitMethodHeaderIntoParts(headerString):
         minMethodLength = 2; #The minimum amount of strings in a header string
 
+        #check if the input is a valid string
+        if (headerString is None) or not(isinstance(headerString, str)):
+            raise(TypeError, "Invalid Header String passed");
+
+        #check if we have valid braces
+        #If no brace is found, it will throw an error
+        firstCurlyBracePos = headerString.index("(");
+        secondCurlyBracePos = headerString.index(")");
+        
+        methodQualifiersWithoutParams = headerString[0:firstCurlyBracePos];
+
+        methodParams = headerString[firstCurlyBracePos+1:secondCurlyBracePos];
+        
+        return methodQualifiersWithoutParams, methodParams;
+
+    def createUnitTestsMethods(methodHeader):
         #initialize the method qualifiers and return types we expect
         accessModifiers = ["public", "protected", "private"];
         instanceModifier = ["static"];
@@ -69,43 +62,14 @@ class TddHelperJava:
         reentrancyModifier = ["synchronized"];
         nativeModifier = ["native"];
         strictfpModifier = ["strictfp"];
-        primitiveIntDataTypes = ["int", "short", "byte", "long", "float", "double"];
-        
-        if (headerString is None) or not(isinstance(headerString, str)):
-            raise(TypeError, "Invalid Header String passed");
 
-        splitHeader = str.split(headerString);
-        
-##        print("String is " + headerString + " Length of string is " + str(len(splitHeader)));
-        
-        if len(splitHeader) < minMethodLength:
-            raise ValueError;
-
-        #else we have a valid method signature
-        #so now split the method header properly
-        #into qualifiers vs. method parameters
-        print("String is",headerString,"Index of curly bracket is", headerString.index("("));
-
-        #If no curly bracket/brace is found, it will throw an error
-##        try:
-##            firstCurlyBracketPos = headerString.index("(");
-##            secondCurlyBracePos = headerString.index(")");
-##        except ValueError:
-##            raise ValueError;
-        firstCurlyBracePos = headerString.index("(");
-        secondCurlyBracePos = headerString.index(")");
-        
-        methodQualifiersWithoutParams = headerString[0:firstCurlyBracePos];
-##        print("New string w/o params", methodQualifiersWithoutParams);
-
-        methodParams = headerString[firstCurlyBracePos+1:secondCurlyBracePos];
-        print("Method params", methodParams);
+        methodQualifiers,methodParams = splitMethodHeaderIntoParts(methodHeader);
 
         #Now parse only the method qualifiers
-        result = parseMethodQualifiers(methodQualifiersWithoutParams);
+        unitTForReturnType = createUTForReturnType(methodQualifiers);
                 
         #Next parse the method parameters
-        result = parseMethodParameters(methodParams);
+        result = createUTForMethodParams(methodParams);
         
         return;
 
@@ -124,15 +88,11 @@ class TddHelperTests(unittest.TestCase):
         return;
 
     def test_invalid_param_SplitMethodHeaderIntoParts(self):
-        #check for an invalid parameter
-        param = "methodName()";
-        self.assertRaises(ValueError, TddHelperJava.splitMethodHeaderIntoParts, param);
-
-        #check for an invalid parameter
+        #check for no opening brace
         param = "public static methodName)";
         self.assertRaises(ValueError, TddHelperJava.splitMethodHeaderIntoParts, param);
 
-        #check for an invalid parameter
+        #check for no closing brace
         param = "public static methodName(";
         self.assertRaises(ValueError, TddHelperJava.splitMethodHeaderIntoParts, param);
         return;
@@ -140,22 +100,33 @@ class TddHelperTests(unittest.TestCase):
     def test_valid_param_SplitMethodHeaderIntoParts(self):
         #check for a valid parameter
         param = "public static void methodName(int param1, int param2)";
-        expectedResult = ""; #Strings of the resulting test methods
-        actualResult = TddHelperJava.splitMethodHeaderIntoParts(param);
 
-        assert(False);
+        #Strings of the resulting test methods
+        expectedResult1 = "public static void methodName";
+        expectedResult2 = "int param1, int param2";
+        actualResult1,actualResult2 = TddHelperJava.splitMethodHeaderIntoParts(param);
+
+        assert(expectedResult1 == actualResult1);
+        assert(expectedResult2 == actualResult2);
         return;
 
-    def test_null_param_parseMethodQualifiers(self):
+    def test_null_param_createUTForReturnType(self):
         #Check for null parameter
         param = None;
-        self.assertRaises(TypeError, TddHelperJava.parseMethodQualifiers, param);
+        self.assertRaises(TypeError, TddHelperJava.createUTForReturnType, param);
         return;
     
-    def test_invalid_paramType_parseMethodQualifiers(self):
+    def test_invalid_paramType_createUTForReturnType(self):
         #check for an invalid parameter type
         param = 5713;
-        self.assertRaises(TypeError, TddHelperJava.parseMethodQualifiers, param);
+        self.assertRaises(TypeError, TddHelperJava.createUTForReturnType, param);
+        return;
+
+    def test_invalid_param_createUTForReturnType(self):
+        #check for no return type in method header
+        param = "methodName";
+        self.assertRaises(ValueError, TddHelperJava.createUTForReturnType, param);
+        
         return;
     
 def main():
