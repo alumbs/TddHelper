@@ -87,14 +87,18 @@ class TddHelperTests(unittest.TestCase):
         self.assertRaises(TypeError, TddHelperJava.splitMethodHeaderIntoParts, param);
         return;
 
-    def test_invalid_param_SplitMethodHeaderIntoParts(self):
+    def test_no_opening_brace_in_method_header_SplitMethodHeaderIntoParts(self):
         #check for no opening brace
         param = "public static methodName)";
         self.assertRaises(ValueError, TddHelperJava.splitMethodHeaderIntoParts, param);
 
+        return;
+
+    def test_no_closing_brace_in_method_header_SplitMethodHeaderIntoParts(self):
         #check for no closing brace
         param = "public static methodName(";
         self.assertRaises(ValueError, TddHelperJava.splitMethodHeaderIntoParts, param);
+        
         return;
 
     def test_valid_param_SplitMethodHeaderIntoParts(self):
