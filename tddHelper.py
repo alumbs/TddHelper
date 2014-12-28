@@ -2,15 +2,19 @@ import unittest
       
 #This is the beginning of a TDD helper program for compiled languages    
 class TddHelperJava:
-    def handleTwoMethodQualifiers(splitMethodQualifiers):
+##    def handleTwoMethodQualifiers(splitMethodQualifiers):
+##
+##        return;
 
-        return;
+##    def handleThreeMethodQualifiers(splitMethodQualifiers):
+##
+##        return;
+##
+##    def handleFourMethodQualifiers(splitMethodQualifiers):
+##
+##        return;
 
-    def handleThreeMethodQualifiers(splitMethodQualifiers):
-
-        return;
-
-    def handleFourMethodQualifiers(splitMethodQualifiers):
+    def handleMethodQualifiers(splitMethodQualifiers):
 
         return;
 
@@ -25,22 +29,24 @@ class TddHelperJava:
         methodQualifierLength = len(splitMethodQualifiers);
 
         result = None;
-        if methodQualifierLength == 2:
+        if methodQualifierLength >= 2:
             #Then we know we only have a return value and a methodName
-            result = handleTwoMethodQualifiers(splitMethodQualifiers);
+##            result = handleTwoMethodQualifiers(splitMethodQualifiers);
+            result = handleMethodQualifiers(splitMethodQualifiers);
 ##            break;
-        elif methodQualifierLength == 3:
-            #Then we know we only have a access/instance qualifier,
-            #a return value, and a methodName
-            result = handleThreeMethodQualifiers(splitMethodQualifiers);
+##        elif methodQualifierLength == 3:
+##            #Then we know we only have a access/instance qualifier,
+##            #a return value, and a methodName
+##            result = handleThreeMethodQualifiers(splitMethodQualifiers);
+####            break;
+##        elif methodQualifierLength == 4:
+##            #Then we know we have an access qualifier, an instance qualifier,
+##            #a return value, and a methodName
+##            result = handleFourMethodQualifiers(splitMethodQualifiers);
 ##            break;
-        elif methodQualifierLength == 4:
-            #Then we know we have an access qualifier, an instance qualifier,
-            #a return value, and a methodName
-            result = handleFourMethodQualifiers(splitMethodQualifiers);
-##            break;
-        else: #default case
-            result = None;
+        else: #Invalid Method Signature
+            raise ValueError; 
+##            result = None;
 ##            break;
         
         for qualifier in splitMethodQualifiers:
