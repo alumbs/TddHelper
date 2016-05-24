@@ -6,10 +6,11 @@ class TddHelperJava:
 ##
 ##        return;
 
-    def createUTForReturnType(methodQualifiers):
+    def createUTForReturnType(methodQualifiers, methodParams):
         minMethodLength = 2; #The minimum amount of strings in a header string
         primitiveIntDataTypes = ["int", "short", "byte", "long", "float", "double"];
         commonReturnType = ["String"];
+        voidReturnType = ["void"];
         
         if (methodQualifiers is None) or not(isinstance(methodQualifiers, str)):
             raise(TypeError, "Invalid method qualifiers passed");
@@ -19,15 +20,22 @@ class TddHelperJava:
 
         #Try making a state machine to handle the parsing
         methodQualifierLength = len(splitMethodQualifiers);
-
-        result = None;
-        if methodQualifierLength >= minMethodLength:
-            #Then we know we at least have a 'return type' and a 'method name'
-##            result = handleMethodQualifiers(splitMethodQualifiers);
-##            unitTestResult = "void test_"
-            result = None;
-        else: #Invalid Method Signature
+        
+        if methodQualifierLength < minMethodLength:
+            #Invalid Method Signature
             raise ValueError;
+
+        #Then we know we at least have a 'return type' and a 'method name'
+        #The return type is always before the method name
+        actualReturnType = splitMethodQualifiers[methodQualifierLength - minMethodLength];
+        actualReturnTypeLower = actualReturnType.lower();
+
+        if actualReturnTypeLower in voidReturnType:
+            result = None;
+        elif actualReturnTypeLower in primitiveIntDataTypes:
+            result = None;
+        else:
+            result = None;
             
         return result;
 
@@ -62,11 +70,15 @@ class TddHelperJava:
         reentrancyModifier = ["synchronized"];
         nativeModifier = ["native"];
         strictfpModifier = ["strictfp"];
+        errorMsg = "The method header is invalid";
 
-        methodQualifiers,methodParams = splitMethodHeaderIntoParts(methodHeader);
+        try:
+            methodQualifiers,methodParams = TddHelperJava.splitMethodHeaderIntoParts(methodHeader);
+        except (TypeError, ValueError):
+            return errorMsg;
 
         #Now parse only the method qualifiers
-        unitTForReturnType = createUTForReturnType(methodQualifiers);
+        unitTForReturnType = createUTForReturnType(methodQualifiers, methodParams);
                 
         #Next parse the method parameters
         result = createUTForMethodParams(methodParams);
@@ -75,6 +87,46 @@ class TddHelperJava:
 
 #Beginning of the "tests" section for this program
 class TddHelperTests(unittest.TestCase):
+    def test_null_param_createUnitTestsMethods(self):
+        #Check for null parameter
+        param = None;
+        expectedResult = "The method header is invalid";
+
+        actualResult = TddHelperJava.createUnitTestsMethods(param);
+
+        assert(expectedResult == actualResult);
+        return;
+    
+    def test_invalid_paramType_createUnitTestsMethods(self):
+        #check for an invalid parameter type
+        param = 5713;
+        expectedResult = "The method header is invalid";
+
+        actualResult = TddHelperJava.createUnitTestsMethods(param);
+        assert(expectedResult == actualResult);
+        
+        return;
+
+    def test_no_opening_brace_in_method_header_createUnitTestsMethods(self):
+        #check for no opening brace
+        param = "public static methodName)";
+        expectedResult = "The method header is invalid";
+
+        actualResult = TddHelperJava.createUnitTestsMethods(param);
+        assert(expectedResult == actualResult);
+        
+        return;
+
+    def test_no_closing_brace_in_method_header_createUnitTestsMethods(self):
+        #check for no closing brace
+        param = "public static methodName(";
+        expectedResult = "The method header is invalid";
+
+        actualResult = TddHelperJava.createUnitTestsMethods(param);
+        assert(expectedResult == actualResult);
+        
+        return;
+    
     def test_null_param_SplitMethodHeaderIntoParts(self):
         #Check for null parameter
         param = None;
@@ -114,24 +166,46 @@ class TddHelperTests(unittest.TestCase):
         assert(expectedResult2 == actualResult2);
         return;
 
-    def test_null_param_createUTForReturnType(self):
+    def test_null_methodQualifier_createUTForReturnType(self):
         #Check for null parameter
-        param = None;
-        self.assertRaises(TypeError, TddHelperJava.createUTForReturnType, param);
+        methodQualifiers = None;
+        methodParams = None;
+        self.assertRaises(TypeError, TddHelperJava.createUTForReturnType, methodQualifiers, methodParams);
         return;
     
-    def test_invalid_paramType_createUTForReturnType(self):
+    def test_invalid_methodQualifierType_createUTForReturnType(self):
         #check for an invalid parameter type
-        param = 5713;
-        self.assertRaises(TypeError, TddHelperJava.createUTForReturnType, param);
+        methodQualifiers = 5713;
+        methodParams = None;
+        self.assertRaises(TypeError, TddHelperJava.createUTForReturnType, methodQualifiers, methodParams);
         return;
 
-    def test_invalid_param_createUTForReturnType(self):
+    def test_invalid_methodQualifierLength_createUTForReturnType(self):
         #check for no return type in method header
-        param = "methodName";
-        self.assertRaises(ValueError, TddHelperJava.createUTForReturnType, param);
+        methodQualifiers = "methodName";
+        methodParams = None;
+        self.assertRaises(ValueError, TddHelperJava.createUTForReturnType, methodQualifiers, methodParams);
         
         return;
+
+    def test_void_return_type_createUTForReturnType(self):
+        #check for a void return type in method header      
+        methodQualifiers = "void methodName";
+        methodParams = None;
+        expectedResult = None;
+        actualResult = TddHelperJava.createUTForReturnType(methodQualifiers, methodParams);
+
+        assert(expectedResult == actualResult);
+        return;
+
+##    def test_valid_number_return_value_createUTForReturnType(self):
+##        #check for a void return type in method header
+##        param = "int methodName";
+##        expectedResult = "void test_valid";
+##        actualResult = TddHelperJava.createUTForReturnType(param);
+##
+##        assert(expectedResult == actualResult);
+##        return;
     
 def main():
     unittest.main();
